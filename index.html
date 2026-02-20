@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lot Size Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0e14;
+      --panel: #111620;
+      --border: #1e2a3a;
+      --gold: #f0c040;
+      --gold-dim: #a07c1a;
+      --green: #00e5a0;
+      --text: #c8d8e8;
+      --muted: #556070;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(240,192,64,0.07) 0%, transparent 70%),
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(30,42,58,0.4) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(30,42,58,0.4) 40px);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 0 60px rgba(240,192,64,0.06), 0 20px 60px rgba(0,0,0,0.6);
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0d1520 0%, #111e30 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 28px 32px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .ticker {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--gold-dim);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #fff;
+      text-transform: uppercase;
+    }
+
+    h1 span { color: var(--gold); }
+
+    .formula-tag {
+      margin-top: 10px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    .formula-tag b { color: var(--gold-dim); }
+
+    .body { padding: 32px; }
+
+    .field { margin-bottom: 24px; }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap span {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    input[type="number"] {
+      width: 100%;
+      background: #0d1218;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 22px;
+      padding: 14px 14px 14px 36px;
+      outline: none;
+      transition: border-color 0.2s;
+      -moz-appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    input[type="number"]:focus {
+      border-color: var(--gold-dim);
+      box-shadow: 0 0 0 3px rgba(240,192,64,0.08);
+    }
+
+    .steps {
+      background: #0d1218;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      line-height: 2;
+      color: var(--muted);
+      min-height: 90px;
+      transition: all 0.3s;
+    }
+
+    .steps .step-val { color: var(--text); }
+    .steps .step-label { color: var(--gold-dim); }
+
+    .result-panel {
+      background: linear-gradient(135deg, #0f1a10, #0d1a14);
+      border: 1px solid rgba(0,229,160,0.2);
+      border-radius: 3px;
+      padding: 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(0,229,160,0.05), transparent 70%);
+    }
+
+    .result-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .result-value {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 52px;
+      font-weight: 400;
+      color: var(--green);
+      line-height: 1;
+      text-shadow: 0 0 30px rgba(0,229,160,0.4);
+      transition: all 0.3s;
+    }
+
+    .result-unit {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 6px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .reset-btn {
+      width: 100%;
+      margin-top: 20px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .reset-btn:hover {
+      border-color: var(--gold-dim);
+      color: var(--gold);
+    }
+
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 14px 32px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="ticker">XAUUSD · MT5 · FOREX</div>
+      <h1>Lot Size <span>Calc</span></h1>
+      <div class="formula-tag">
+        <b>FORMULA</b> &nbsp;(E ÷ 6 ÷ 5) × 0.1
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="field">
+        <label>Account Equity</label>
+        <div class="input-wrap">
+          <span>$</span>
+          <input type="number" id="equity" placeholder="0.00" min="0" step="any" oninput="calculate()" />
+        </div>
+      </div>
+
+      <div class="steps" id="steps">
+        <span style="color:#2a3a4a">Enter your equity above to see the breakdown...</span>
+      </div>
+
+      <div class="result-panel">
+        <div class="result-label">Recommended Lot Size</div>
+        <div class="result-value" id="result">—</div>
+        <div class="result-unit">Lots</div>
+      </div>
+
+      <button class="reset-btn" onclick="reset()">↺ &nbsp; Reset</button>
+    </div>
+
+    <div class="footer">
+      <span>RISK = E / 6</span>
+      <span>X = RISK / 5</span>
+      <span>LOT = X × 0.1</span>
+    </div>
+  </div>
+
+  <script>
+    function calculate() {
+      const eq = parseFloat(document.getElementById('equity').value);
+      const stepsEl = document.getElementById('steps');
+      const resultEl = document.getElementById('result');
+
+      if (!eq || eq <= 0) {
+        stepsEl.innerHTML = '<span style="color:#2a3a4a">Enter your equity above to see the breakdown...</span>';
+        resultEl.textContent = '—';
+        return;
+      }
+
+      const R = eq / 6;
+      const X = R / 5;
+      const lot = X * 0.1;
+
+      stepsEl.innerHTML =
+        `<span class="step-label">R</span> = ${eq.toLocaleString()} ÷ 6 = <span class="step-val">${R.toFixed(2)}</span>\n` +
+        `<span class="step-label">X</span> = ${R.toFixed(2)} ÷ 5 = <span class="step-val">${X.toFixed(2)}</span>\n` +
+        `<span class="step-label">LOT</span> = ${X.toFixed(2)} × 0.1 = <span class="step-val">${lot.toFixed(2)}</span>`;
+
+      resultEl.textContent = lot.toFixed(2);
+    }
+
+    function reset() {
+      document.getElementById('equity').value = '';
+      document.getElementById('steps').innerHTML = '<span style="color:#2a3a4a">Enter your equity above to see the breakdown...</span>';
+      document.getElementById('result').textContent = '—';
+    }
+  </script>
+</body>
+</html>
